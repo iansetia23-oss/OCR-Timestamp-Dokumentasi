@@ -1,0 +1,2897 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Timemark OCR Foto - Database Tempat</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111827;color:#f3f4f6;font-family:Arial,sans-serif}
+.wrap{max-width:1250px;margin:auto;padding:14px}
+h1{font-size:23px;text-align:center;margin:8px 0}
+.sub{text-align:center;color:#9ca3af;font-size:13px;margin-bottom:15px}
+.card{background:#1f2937;border:1px solid #374151;border-radius:14px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.box{background:#111827;border-radius:10px;padding:11px}
+label{display:block;color:#9ca3af;font-size:12px;margin-bottom:7px}
+input[type=text],input[type=number],select{
+  width:100%;padding:10px;background:#111827;border:1px solid #4b5563;
+  color:#fff;border-radius:8px;margin-bottom:6px
+}
+.key-row{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-bottom:6px;
+}
+.key-row input{
+  flex:1;
+  margin-bottom:0;
+}
+.key-toggle{
+  flex:0 0 42px;
+  height:39px;
+  border:1px solid #4b5563;
+  border-radius:8px;
+  background:#111827;
+  color:#fff;
+  cursor:pointer;
+}
+.key-toggle:active{
+  transform:scale(.97);
+}
+
+input[type=range]{width:100%;accent-color:#0ea5e9}
+.cropval{font-size:21px;font-weight:bold;color:#38bdf8;text-align:center}
+.cropmarks{display:flex;justify-content:space-between;color:#6b7280;font-size:10px}
+.drop{border:2px dashed #4b5563;padding:24px;text-align:center;border-radius:12px;cursor:pointer}
+.drop:hover{border-color:#38bdf8}
+.drop input{display:none}
+.btn{border:0;border-radius:9px;padding:11px 14px;font-weight:bold;cursor:pointer;margin:5px 4px 0 0}
+.primary{background:#0ea5e9;color:#fff}
+.green{background:#22c55e;color:#052e16}
+.red{background:#ef4444;color:#fff}
+.gray{background:#4b5563;color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.smallbtn{border:0;border-radius:7px;padding:7px 9px;background:#4b5563;color:#fff;cursor:pointer;font-size:12px}
+.progress{height:12px;background:#111827;border-radius:20px;overflow:hidden;margin-top:8px}
+.bar{height:100%;width:0;background:#22c55e;transition:.2s}
+.center{text-align:center;color:#9ca3af;font-size:13px;margin-top:6px}
+
+/* Hasil Card */
+.results-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.result-card{
+  background:#111827;border:1px solid #374151;border-radius:14px;
+  overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.15)
+}
+.result-photo{
+  width:100%;display:block;max-height:430px;object-fit:cover;
+  cursor:pointer;background:#0b1220
+}
+.result-body{padding:12px}
+.place-name{font-size:17px;font-weight:bold;line-height:1.3;margin-bottom:8px;color:#fff}
+.meta-row{display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0;color:#d1d5db}
+.meta-label{color:#9ca3af;min-width:66px}
+.coord-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.coord-text{font-size:12px;color:#d1d5db;word-break:break-all}
+.maps-btn{
+  flex:0 0 auto;border:1px solid #4b5563;background:#1f2937;color:#fff;
+  border-radius:7px;padding:5px 8px;font-size:11px;cursor:pointer
+}
+.maps-btn:hover{background:#374151}
+.candidates{
+  margin-top:8px;padding:7px 9px;border-radius:8px;
+  background:#1f2937;color:#9ca3af;font-size:11px;line-height:1.4
+}
+.no-place{color:#fca5a5}
+.card-status{font-size:11px;color:#9ca3af;margin-top:8px}
+
+/* Thumbnail queue */
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:9px;margin-top:12px}
+.thumb{position:relative;background:#111827;border:1px solid #374151;border-radius:9px;padding:5px}
+.thumb img{width:100%;height:100px;object-fit:cover;border-radius:6px;cursor:pointer}
+.x{
+  position:absolute;right:5px;top:5px;width:25px;height:25px;border:0;border-radius:50%;
+  background:#ef4444;color:#fff;font-weight:bold;font-size:17px;z-index:2;cursor:pointer
+}
+.name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
+.status{font-size:10px;color:#9ca3af;margin-top:3px}
+
+/* Modal */
+.modal{
+  display:none;position:fixed;inset:0;background:#000d;z-index:50;padding:12px;
+  align-items:center;justify-content:center
+}
+.modal.show{display:flex}
+.modalbox{
+  background:#1f2937;width:100%;max-width:900px;max-height:94vh;overflow:auto;
+  border-radius:14px;padding:14px
+}
+.close{float:right;font-size:28px;cursor:pointer;line-height:1}
+.modal img{display:block;max-width:100%;max-height:72vh;margin:auto;border-radius:8px}
+.modal-title{font-size:17px;font-weight:bold;margin:4px 0 12px}
+pre{
+  white-space:pre-wrap;word-break:break-word;background:#111827;
+  padding:10px;border-radius:8px;font-size:12px
+}
+
+/* Database */
+.db-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.db-list{display:flex;flex-direction:column;gap:8px}
+.db-item{
+  display:grid;grid-template-columns:1fr auto;gap:8px;
+  background:#111827;border:1px solid #374151;border-radius:10px;padding:10px
+}
+.db-name{font-weight:bold;font-size:13px}
+.db-coord{font-size:11px;color:#9ca3af;margin-top:3px}
+.db-actions{display:flex;gap:5px;align-items:center}
+.db-empty{text-align:center;color:#9ca3af;padding:20px}
+.db-count{font-size:12px;color:#9ca3af;margin-bottom:9px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.form-grid .full{grid-column:1/-1}
+
+@media(max-width:700px){
+  .grid{grid-template-columns:1fr}
+  .thumbs{grid-template-columns:repeat(3,1fr)}
+  .result-photo{max-height:360px}
+  .form-grid{grid-template-columns:1fr}
+  .db-item{grid-template-columns:1fr}
+  .db-actions{justify-content:flex-end}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<h1>📸 Timemark OCR Foto</h1>
+<div class="sub">OCR + pencocokan koordinat database sekolah</div>
+
+<!-- ===================== PENGATURAN OCR ===================== -->
+<div class="card">
+  <h3>⚙️ Pengaturan OCR</h3>
+
+  <div class="grid">
+
+    <div class="box">
+      <label>OCR.space API Keys (tersimpan di memori browser)</label>
+
+      <div class="key-row">
+        <input id="apiKey1" type="password" placeholder="API Key 1 (Wajib)" autocomplete="off" spellcheck="false">
+        <button type="button" class="key-toggle" data-target="apiKey1">👁</button>
+      </div>
+
+      <div class="key-row">
+        <input id="apiKey2" type="password" placeholder="API Key 2 (Opsional)" autocomplete="off" spellcheck="false">
+        <button type="button" class="key-toggle" data-target="apiKey2">👁</button>
+      </div>
+
+      <div class="key-row">
+        <input id="apiKey3" type="password" placeholder="API Key 3 (Opsional)" autocomplete="off" spellcheck="false">
+        <button type="button" class="key-toggle" data-target="apiKey3">👁</button>
+      </div>
+
+      <div style="font-size:10px;color:#6b7280;margin-top:4px">
+        API Key disimpan lokal di browser dan tidak ditulis langsung di kode HTML.
+      </div>
+    </div>
+
+    <div class="box">
+      <label>OCR Engine</label>
+      <select id="engine">
+        <option value="1">Engine 1</option>
+        <option value="2">Engine 2</option>
+        <option value="3" selected>Engine 3 (Cepat)</option>
+      </select>
+    </div>
+
+    <div class="box">
+      <label>Crop foto — bagian bawah yang dikirim ke OCR</label>
+      <div id="cropValue" class="cropval">50%</div>
+<input id="crop" type="range" min="0" max="100" value="50">
+<div class="cropmarks"><span>0%</span><span>50%</span><span>100%</span></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:10px">
+    <button id="openDatabase" class="btn gray">🏫 DATABASE TEMPAT</button>
+    <span id="radiusInfo" class="center" style="display:inline-block;margin-left:5px">
+      Radius: 50 meter
+    </span>
+  </div>
+</div>
+
+
+<!-- ===================== FOTO ===================== -->
+<div class="card">
+
+  <h3>📷 Foto</h3>
+
+  <label class="drop">
+    <div style="font-size:38px">📷</div>
+    <b>Tap untuk memilih banyak foto</b>
+    <div class="sub" style="margin:7px 0 0">JPG / JPEG / PNG / WEBP</div>
+    <input id="files" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+  </label>
+
+  <div id="info" style="margin-top:10px">Belum ada foto</div>
+  <div id="thumbs" class="thumbs"></div>
+
+  <button id="start" class="btn primary" disabled>🚀 MULAI OCR</button>
+  <button id="clear" class="btn red">🗑️ HAPUS SEMUA</button>
+
+</div>
+
+
+<!-- ===================== PROGRESS ===================== -->
+<div class="card">
+
+  <h3>📊 Progress</h3>
+
+  <div class="progress">
+    <div id="bar" class="bar"></div>
+  </div>
+
+  <div id="progressText" class="center">0 / 0</div>
+  <div id="status" class="center">Siap</div>
+
+</div>
+
+
+<!-- ===================== HASIL CARD ===================== -->
+<div class="card">
+
+  <h3>📋 Hasil Pembacaan</h3>
+
+  <div id="summary" class="center">Belum ada hasil</div>
+
+  <div id="results" class="results-grid" style="margin-top:12px"></div>
+
+</div>
+
+</div>
+
+
+<!-- ===================== MODAL FOTO ===================== -->
+<div id="photoModal" class="modal">
+
+  <div class="modalbox">
+
+    <span class="close" id="photoClose">×</span>
+
+    <div id="photoTitle" class="modal-title"></div>
+
+    <img id="photoLarge" alt="Foto">
+
+  </div>
+
+</div>
+
+
+<!-- ===================== MODAL DATABASE ===================== -->
+<div id="dbModal" class="modal">
+
+  <div class="modalbox">
+
+    <span class="close" id="dbClose">×</span>
+
+    <h3>🏫 Database Tempat</h3>
+
+    <div class="sub" style="text-align:left">
+      Tambah, edit, hapus, import, dan export database sekolah. Database tersimpan di memori browser.
+    </div>
+
+    <div class="box" style="margin-bottom:12px">
+
+      <div class="form-grid">
+
+        <div class="full">
+          <label>Nama tempat</label>
+          <input id="dbName" type="text" placeholder="Contoh: TK Bina Sejahtera">
+        </div>
+
+        <div>
+          <label>Latitude</label>
+          <input id="dbLat" type="number" step="any" placeholder="-5.310485">
+        </div>
+
+        <div>
+          <label>Longitude</label>
+          <input id="dbLon" type="number" step="any" placeholder="105.478378">
+        </div>
+
+      </div>
+
+      <button id="dbSave" class="btn primary">💾 SIMPAN</button>
+      <button id="dbCancelEdit" class="btn gray" style="display:none">BATAL EDIT</button>
+
+    </div>
+
+    <div class="box" style="margin-bottom:12px">
+
+      <label>Radius pencocokan untuk SEMUA tempat</label>
+
+      <div style="display:flex;gap:8px;align-items:center">
+
+        <input
+          id="radius"
+          type="number"
+          min="1"
+          max="10000"
+          step="1"
+          value="50"
+          style="margin:0"
+        >
+
+        <span style="font-size:12px;color:#9ca3af">meter</span>
+
+      </div>
+
+      <div style="font-size:11px;color:#6b7280;margin-top:6px">
+        Jika jarak koordinat OCR lebih besar dari radius, tempat tidak dianggap cocok.
+      </div>
+
+    </div>
+
+    <div class="db-toolbar">
+
+      <button id="dbExport" class="btn green">⬇️ EXPORT JSON</button>
+
+      <button id="dbImportBtn" class="btn gray">⬆️ IMPORT JSON</button>
+
+      <input
+        id="dbImport"
+        type="file"
+        accept="application/json,.json"
+        style="display:none"
+      >
+
+    </div>
+
+    <div id="dbCount" class="db-count"></div>
+
+    <div id="dbList" class="db-list"></div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const OCR_URL='https://api.ocr.space/parse/image';
+const MAX_WIDTH=1200;
+
+let items=[];
+let running=false;
+let completedCount=0;
+
+/*
+  Cache hanya selama halaman/session aktif.
+  Hanya hasil OCR dengan confidence HIGH yang disimpan.
+*/
+const ocrCache=new Map();
+
+/*
+  Database tempat.
+  Disimpan ke localStorage agar perubahan database
+  tetap ada ketika halaman direfresh.
+*/
+const DB_STORAGE_KEY='timemark_place_database_v1';
+const RADIUS_STORAGE_KEY='timemark_place_radius_v1';
+const API_STORAGE_KEY='timemark_ocr_api_settings_v1';
+const CROP_STORAGE_KEY='timemark_ocr_crop_v1';
+
+const DEFAULT_PLACES=[
+  {name:'TK Islam Sariatama',lat:-5.370188,lon:105.429813},
+  {name:'KB Anggrek',lat:-5.368938,lon:105.429938},
+  {name:'KB Tunas Mulia',lat:-5.370144,lon:105.429596},
+  {name:'SDN 2 P. Dalam',lat:-5.368965,lon:105.433478},
+  {name:'SDN 1 P. Dalam',lat:-5.373063,lon:105.429313},
+  {name:'KB Bina Sejahtera',lat:-5.310485,lon:105.478378},
+  {name:'TK Satu Atap Malangsari',lat:-5.307301,lon:105.478116},
+  {name:'SDN Malangsari',lat:-5.307301,lon:105.478116},
+  {name:'SDN Sidomukti',lat:-5.368490,lon:105.480981},
+  {name:'SDN 1 Wonodadi',lat:-5.346155,lon:105.454875},
+  {name:'SMAN Tanjung Sari',lat:-5.364610,lon:105.485987},
+  {name:'RA. Sidomukti',lat:-5.368490,lon:105.480981},
+  {name:'RA. K. Jannah Wonodadi',lat:-5.347560,lon:105.456667},
+  {name:'SD IT Al Abror Kertosari',lat:-5.336131,lon:105.467229}
+];
+
+let places=loadPlaces();
+let radius=loadRadius();
+let editingIndex=-1;
+
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const $=id=>document.getElementById(id);
+
+
+/* =========================================================
+   DATABASE STORAGE
+========================================================= */
+
+function loadPlaces(){
+
+  try{
+
+    const saved=localStorage.getItem(DB_STORAGE_KEY);
+
+    if(!saved) return structuredCloneSafe(DEFAULT_PLACES);
+
+    const parsed=JSON.parse(saved);
+
+    if(!Array.isArray(parsed)) return structuredCloneSafe(DEFAULT_PLACES);
+
+    return parsed
+      .filter(x =>
+        x &&
+        typeof x.name==='string' &&
+        Number.isFinite(Number(x.lat)) &&
+        Number.isFinite(Number(x.lon))
+      )
+      .map(x => ({
+        name:x.name.trim(),
+        lat:Number(x.lat),
+        lon:Number(x.lon)
+      }))
+      .filter(x => x.name);
+
+  }catch(err){
+
+    console.warn('Database gagal dibaca:',err);
+
+    return structuredCloneSafe(DEFAULT_PLACES);
+
+  }
+
+}
+
+
+function structuredCloneSafe(data){
+
+  return JSON.parse(JSON.stringify(data));
+
+}
+
+
+function savePlaces(){
+
+  localStorage.setItem(
+    DB_STORAGE_KEY,
+    JSON.stringify(places)
+  );
+
+}
+
+
+function loadRadius(){
+
+  const saved=Number(
+    localStorage.getItem(RADIUS_STORAGE_KEY)
+  );
+
+  return Number.isFinite(saved) && saved>0
+    ? saved
+    : 50;
+
+}
+
+
+function saveRadius(){
+
+  localStorage.setItem(
+    RADIUS_STORAGE_KEY,
+    String(radius)
+  );
+
+}
+
+
+function updateRadiusUI(){
+
+  $('radius').value=radius;
+
+  $('radiusInfo').textContent=
+    `Radius: ${radius} meter`;
+
+}
+
+/* =========================================================
+   BROWSER MEMORY / LOCAL STORAGE SETTINGS
+========================================================= */
+
+function loadApiSettings(){
+
+  try{
+
+    const data=JSON.parse(
+      localStorage.getItem(API_STORAGE_KEY) || '{}'
+    );
+
+    $('apiKey1').value=data.apiKey1 || '';
+    $('apiKey2').value=data.apiKey2 || '';
+    $('apiKey3').value=data.apiKey3 || '';
+
+  }catch(err){
+
+    console.warn('API settings gagal dibaca:',err);
+
+  }
+
+}
+
+
+function saveApiSettings(){
+
+  localStorage.setItem(
+    API_STORAGE_KEY,
+    JSON.stringify({
+      apiKey1:$('apiKey1').value.trim(),
+      apiKey2:$('apiKey2').value.trim(),
+      apiKey3:$('apiKey3').value.trim()
+    })
+  );
+
+}
+
+
+function loadCrop(){
+
+  const saved=Number(
+    localStorage.getItem(CROP_STORAGE_KEY)
+  );
+
+  const value=
+    Number.isFinite(saved) &&
+    saved>=0 &&
+    saved<=100
+      ? saved
+      : 50;
+
+  $('crop').value=value;
+  $('cropValue').textContent=value+'%';
+
+}
+
+
+function saveCrop(){
+
+  const value=Number($('crop').value);
+
+  localStorage.setItem(
+    CROP_STORAGE_KEY,
+    String(value)
+  );
+
+}
+
+
+$('apiKey1').addEventListener('input',saveApiSettings);
+$('apiKey2').addEventListener('input',saveApiSettings);
+$('apiKey3').addEventListener('input',saveApiSettings);
+
+document.querySelectorAll('.key-toggle').forEach(button=>{
+
+  button.addEventListener('click',()=>{
+
+    const input=$(button.dataset.target);
+
+    if(!input) return;
+
+    if(input.type==='password'){
+
+      input.type='text';
+      button.textContent='🙈';
+
+    }else{
+
+      input.type='password';
+      button.textContent='👁';
+
+    }
+
+  });
+
+});
+
+$('crop').addEventListener('input',()=>{
+
+  $('cropValue').textContent=
+    $('crop').value+'%';
+
+  saveCrop();
+
+});
+
+
+
+/* =========================================================
+   CROP
+========================================================= */
+
+
+
+
+/* =========================================================
+   FILE INPUT
+========================================================= */
+
+$('files').onchange=e=>{
+
+  for(const file of [...e.target.files]){
+
+    if(
+      items.some(x =>
+        x.file.name===file.name &&
+        x.file.size===file.size &&
+        x.file.lastModified===file.lastModified
+      )
+    ){
+      continue;
+    }
+
+    const cacheKey=getFileCacheKey(file);
+
+    let initialStatus='waiting';
+    let cachedRaw='';
+    let cachedParsed=null;
+
+    /*
+      Jika file yang sama pernah menghasilkan HIGH,
+      gunakan cache tanpa OCR ulang.
+    */
+    if(ocrCache.has(cacheKey)){
+
+      const cached=ocrCache.get(cacheKey);
+
+      if(
+        cached &&
+        cached.parsed &&
+        cached.parsed.confidence==='HIGH'
+      ){
+
+        initialStatus='ok (cached)';
+        cachedRaw=cached.raw;
+        cachedParsed=clone(cached.parsed);
+
+      }
+
+    }
+
+    items.push({
+      file,
+      url:URL.createObjectURL(file),
+      status:initialStatus,
+      raw:cachedRaw,
+      parsed:cachedParsed,
+      location:null
+    });
+
+  }
+
+  e.target.value='';
+
+  renderThumbs();
+  renderResults();
+
+};
+
+
+/* =========================================================
+   FILE CACHE KEY
+========================================================= */
+
+function getFileCacheKey(file){
+
+  return [
+    file.name,
+    file.size,
+    file.lastModified
+  ].join('_');
+
+}
+
+
+/* =========================================================
+   THUMBNAILS
+========================================================= */
+
+function renderThumbs(){
+
+  $('info').textContent=
+    items.length
+      ? `${items.length} foto dipilih`
+      : 'Belum ada foto';
+
+  $('start').disabled=
+    !items.length || running;
+
+  $('thumbs').innerHTML=
+    items.map((x,i)=>`
+
+      <div class="thumb">
+
+        <button
+          class="x"
+          onclick="removeItem(${i});event.stopPropagation()"
+        >×</button>
+
+        <img
+          src="${x.url}"
+          onclick="openPhoto(${i})"
+          alt=""
+        >
+
+        <div class="name">
+          ${esc(x.file.name)}
+        </div>
+
+        <div class="status">
+          ${statusText(x.status)}
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+function statusText(status){
+
+  if(String(status).includes('cached')){
+    return 'Cache HIGH';
+  }
+
+  return {
+    waiting:'Menunggu',
+    processing:'OCR...',
+    ok:'Selesai',
+    error:'Gagal'
+  }[status] || status;
+
+}
+
+
+/* =========================================================
+   REMOVE
+========================================================= */
+
+function removeItem(i){
+
+  if(running){
+    return alert('Tunggu proses selesai.');
+  }
+
+  URL.revokeObjectURL(items[i].url);
+
+  items.splice(i,1);
+
+  renderThumbs();
+  renderResults();
+
+}
+
+
+/* =========================================================
+   CLEAR
+========================================================= */
+
+$('clear').onclick=()=>{
+
+  if(running){
+    return alert('Tunggu proses selesai.');
+  }
+
+  items.forEach(x=>URL.revokeObjectURL(x.url));
+
+  items=[];
+
+  $('bar').style.width='0%';
+  $('progressText').textContent='0 / 0';
+  $('status').textContent='Siap';
+  $('summary').textContent='Belum ada hasil';
+
+  renderThumbs();
+  renderResults();
+
+};
+
+
+/* =========================================================
+   START OCR
+========================================================= */
+
+$('start').onclick=startOCR;
+
+
+async function startOCR(){
+
+  if(running || !items.length) return;
+
+  const keys=[
+    $('apiKey1').value.trim(),
+    $('apiKey2').value.trim(),
+    $('apiKey3').value.trim()
+  ].filter(Boolean);
+
+  if(!keys.length){
+    return alert('Masukkan minimal 1 API Key OCR.space.');
+  }
+
+  running=true;
+
+  $('start').disabled=true;
+  $('clear').disabled=true;
+
+  const engine=$('engine').value;
+  const crop=Number($('crop').value);
+
+  /*
+    Setiap kali tombol ditekan, hanya item HIGH yang dilewati.
+    MEDIUM / LOW / ERROR tetap diproses ulang.
+  */
+  const queue=[];
+
+  items.forEach((item,index)=>{
+
+    const high=
+      item.parsed &&
+      item.parsed.confidence==='HIGH';
+
+    if(!high){
+      queue.push(index);
+    }
+
+  });
+
+  completedCount=
+    items.length-queue.length;
+
+  const initialPct=
+    items.length
+      ? Math.round(completedCount/items.length*100)
+      : 0;
+
+  $('bar').style.width=initialPct+'%';
+  $('progressText').textContent=
+    `${completedCount} / ${items.length}`;
+
+  renderResults();
+
+  if(queue.length===0){
+
+    running=false;
+    $('clear').disabled=false;
+    $('start').disabled=false;
+
+    $('status').textContent=
+      'Selesai — semua hasil HIGH, tidak ada OCR ulang.';
+
+    return;
+  }
+
+  $('status').textContent=
+    `Memproses ${queue.length} foto...`;
+
+  const workers=keys.map(
+    async(key,workerId)=>{
+
+      while(queue.length){
+
+        const index=queue.shift();
+
+        if(index===undefined) break;
+
+        await processItem(
+          index,
+          key,
+          engine,
+          crop,
+          workerId+1
+        );
+
+        if(queue.length){
+          await sleep(1500);
+        }
+
+      }
+
+    }
+  );
+
+  await Promise.all(workers);
+
+  running=false;
+
+  $('clear').disabled=false;
+  $('start').disabled=false;
+
+  $('status').textContent='Selesai';
+
+  renderThumbs();
+  renderResults();
+
+}
+
+
+/* =========================================================
+   PROCESS OCR ITEM
+========================================================= */
+
+async function processItem(
+  index,
+  key,
+  engine,
+  crop,
+  workerId
+){
+
+  const item=items[index];
+
+  /*
+    Safety check:
+    kalau ternyata sudah HIGH, jangan API.
+  */
+  if(
+    item.parsed &&
+    item.parsed.confidence==='HIGH'
+  ){
+    item.status='ok (cached)';
+    return;
+  }
+
+  item.status='processing';
+
+  renderThumbs();
+
+  $('status').textContent=
+    `Worker ${workerId}: ${item.file.name}`;
+
+  try{
+
+    const cropped=
+      await cropBottom(item.file,crop);
+
+    item.raw=
+      await sendOCR(
+        cropped,
+        key,
+        engine
+      );
+
+    item.parsed=
+      parseTimemark(item.raw);
+
+    item.location=
+      matchPlace(item.parsed);
+
+    item.status='ok';
+
+    /*
+      Cache HANYA hasil OCR HIGH.
+    */
+    if(
+      item.parsed &&
+      item.parsed.confidence==='HIGH'
+    ){
+
+      const cacheKey=
+        getFileCacheKey(item.file);
+
+      ocrCache.set(
+        cacheKey,
+        {
+          raw:item.raw,
+          parsed:clone(item.parsed)
+        }
+      );
+
+      item.status='ok (cached)';
+
+    }
+
+  }catch(err){
+
+    console.error(err);
+
+    item.raw=
+      '[ERROR] '+err.message;
+
+    item.parsed=
+      emptyParsed();
+
+    item.location=null;
+
+    item.status='error';
+
+  }
+
+  completedCount++;
+
+  const pct=
+    Math.round(
+      completedCount/items.length*100
+    );
+
+  $('bar').style.width=pct+'%';
+
+  $('progressText').textContent=
+    `${completedCount} / ${items.length}`;
+
+  renderThumbs();
+  renderResults();
+
+}
+
+
+/* =========================================================
+   OCR API
+========================================================= */
+
+async function sendOCR(file,key,engine){
+
+  const fd=new FormData();
+
+  fd.append('apikey',key);
+  fd.append('language','eng');
+  fd.append('OCREngine',engine);
+  fd.append('scale','true');
+  fd.append('isOverlayRequired','false');
+  fd.append('file',file);
+
+  const response=
+    await fetch(
+      OCR_URL,
+      {
+        method:'POST',
+        body:fd
+      }
+    );
+
+  if(!response.ok){
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const data=await response.json();
+
+  if(data.IsErroredOnProcessing){
+
+    const msg=
+      Array.isArray(data.ErrorMessage)
+        ? data.ErrorMessage.join(', ')
+        : (
+            data.ErrorMessage ||
+            'OCR gagal'
+          );
+
+    throw new Error(msg);
+  }
+
+  if(
+    !data.ParsedResults ||
+    !data.ParsedResults.length
+  ){
+    throw new Error(
+      'OCR tidak menghasilkan teks'
+    );
+  }
+
+  return data.ParsedResults
+    .map(x=>x.ParsedText||'')
+    .join('\n')
+    .trim();
+
+}
+
+
+/* =========================================================
+   CROP + GRAYSCALE
+========================================================= */
+
+function cropBottom(file,pct){
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const reader=new FileReader();
+
+      reader.onload=e=>{
+
+        const img=new Image();
+
+        img.onload=()=>{
+
+          try{
+
+            let srcW=img.naturalWidth;
+            let srcH=img.naturalHeight;
+
+            let cropH=
+              pct===0
+                ? srcH
+                : Math.round(srcH*pct/100);
+
+            let srcY=
+              pct===0
+                ? 0
+                : srcH-cropH;
+
+            let outW=srcW;
+            let outH=cropH;
+
+            if(outW>MAX_WIDTH){
+
+              const ratio=MAX_WIDTH/outW;
+
+              outW=MAX_WIDTH;
+              outH=Math.round(outH*ratio);
+
+            }
+
+            const canvas=
+              document.createElement('canvas');
+
+            canvas.width=outW;
+            canvas.height=outH;
+
+            const ctx=
+              canvas.getContext(
+                '2d',
+                {willReadFrequently:true}
+              );
+
+            ctx.fillStyle='#fff';
+
+            ctx.fillRect(
+              0,0,outW,outH
+            );
+
+            ctx.drawImage(
+              img,
+              0,
+              srcY,
+              srcW,
+              cropH,
+              0,
+              0,
+              outW,
+              outH
+            );
+
+            const imgData=
+              ctx.getImageData(
+                0,
+                0,
+                outW,
+                outH
+              );
+
+            const data=imgData.data;
+
+            for(
+              let i=0;
+              i<data.length;
+              i+=4
+            ){
+
+              const avg=
+                data[i]*0.299+
+                data[i+1]*0.587+
+                data[i+2]*0.114;
+
+              data[i]=avg;
+              data[i+1]=avg;
+              data[i+2]=avg;
+
+            }
+
+            ctx.putImageData(
+              imgData,
+              0,
+              0
+            );
+
+            canvas.toBlob(
+              blob=>{
+
+                if(!blob){
+
+                  return reject(
+                    new Error(
+                      'Gagal membuat crop'
+                    )
+                  );
+
+                }
+
+                resolve(
+                  new File(
+                    [blob],
+                    file.name.replace(
+                      /\.[^.]+$/,
+                      ''
+                    )+'_crop.jpg',
+                    {type:'image/jpeg'}
+                  )
+                );
+
+              },
+              'image/jpeg',
+              0.75
+            );
+
+          }catch(err){
+
+            reject(err);
+
+          }
+
+        };
+
+        img.onerror=()=>
+          reject(
+            new Error(
+              'Gagal membaca gambar'
+            )
+          );
+
+        img.src=e.target.result;
+
+      };
+
+      reader.onerror=()=>
+        reject(
+          new Error(
+            'Gagal membaca file'
+          )
+        );
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   OCR PARSER
+========================================================= */
+
+function parseTimemark(raw){
+
+  const normalized=
+    normalizeOCR(raw);
+
+  const date=
+    parseDate(normalized);
+
+  const time=
+    parseTime(normalized);
+
+  const coord=
+    parseCoordinates(normalized);
+
+  const confidence=
+    overallConfidence(
+      date,
+      time,
+      coord
+    );
+
+  return {
+    date,
+    time,
+    coord,
+    confidence
+  };
+
+}
+
+
+function emptyParsed(){
+
+  return {
+    date:{
+      value:'',
+      confidence:'LOW'
+    },
+    time:{
+      value:'',
+      confidence:'LOW'
+    },
+    coord:{
+      lat:'',
+      lon:'',
+      confidence:'LOW'
+    },
+    confidence:'LOW'
+  };
+
+}
+
+
+function normalizeOCR(s){
+
+  if(!s) return '';
+
+  return s
+    .replace(/\r/g,'')
+    .replace(/\u00A0/g,' ')
+    .replace(/[•·]/g,'.')
+    .replace(/(?<=\d),(?=\d)/g,'.')
+    .replace(/[°º]/g,'°')
+    .replace(/[ \t]+/g,' ');
+
+}
+
+
+const MONTHS={
+  januari:1,
+  january:1,
+  februari:2,
+  february:2,
+  maret:3,
+  march:3,
+  april:4,
+  mei:5,
+  may:5,
+  juni:6,
+  june:6,
+  juli:7,
+  july:7,
+  agustus:8,
+  augustus:8,
+  agustuss:8,
+  agust:8,
+  gustus:8,
+  september:9,
+  septembre:9,
+  oktober:10,
+  october:10,
+  november:11,
+  desember:12,
+  december:12
+};
+
+
+function monthNumber(word){
+
+  const w=
+    stripAccent(
+      word.toLowerCase()
+    );
+
+  if(MONTHS[w]) return MONTHS[w];
+
+  let best=null;
+  let bestDistance=99;
+
+  for(const name in MONTHS){
+
+    const d=
+      levenshtein(w,name);
+
+    if(d<bestDistance){
+
+      bestDistance=d;
+      best=MONTHS[name];
+
+    }
+
+  }
+
+  return bestDistance<=3
+    ? best
+    : null;
+
+}
+
+
+function parseDate(s){
+
+  let m=
+    s.match(
+      /\b(0?[1-9]|[12]\d|3[01])\s*[\/.-]\s*(0?[1-9]|1[0-2])\s*[\/.-]\s*(20\d{2})\b/
+    );
+
+  if(m){
+
+    return makeDate(
+      +m[1],
+      +m[2],
+      +m[3],
+      'HIGH'
+    );
+
+  }
+
+  m=
+    s.match(
+      /\b(0?[1-9]|[12]\d|3[01])\s+([A-Za-zÀ-ÿ]+)\s+(20\d{2})\b/i
+    );
+
+  if(m){
+
+    const month=
+      monthNumber(m[2]);
+
+    if(month){
+
+      return makeDate(
+        +m[1],
+        month,
+        +m[3],
+        'HIGH'
+      );
+
+    }
+
+  }
+
+  m=
+    s.match(
+      /\b(0?[1-9]|[12]\d|3[01])\s+(gustus|agustus|augustus)\s+(20\d{2})\b/i
+    );
+
+  if(m){
+
+    return makeDate(
+      +m[1],
+      8,
+      +m[3],
+      'MEDIUM'
+    );
+
+  }
+
+  return {
+    value:'',
+    confidence:'LOW'
+  };
+
+}
+
+
+function makeDate(
+  day,
+  month,
+  year,
+  confidence
+){
+
+  if(
+    day<1 ||
+    day>31 ||
+    month<1 ||
+    month>12
+  ){
+
+    return {
+      value:'',
+      confidence:'LOW'
+    };
+
+  }
+
+  return {
+    value:
+      String(day).padStart(2,'0')+
+      '/'+
+      String(month).padStart(2,'0')+
+      '/'+
+      year,
+    confidence
+  };
+
+}
+
+
+function parseTime(s){
+
+  const lines=s.split('\n');
+
+  for(const line of lines){
+
+    if(
+      /(?:jumat|sabtu|minggu|senin|selasa|rabu|kamis)/i.test(line) ||
+      /\b(?:januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)\b/i.test(line) ||
+      /\b20\d{2}\b/.test(line)
+    ){
+
+      const result=findTime(line);
+
+      if(result.value) return result;
+
+    }
+
+  }
+
+  for(const line of lines){
+
+    const result=findTime(line);
+
+    if(result.value) return result;
+
+  }
+
+  return {
+    value:'',
+    confidence:'LOW'
+  };
+
+}
+
+
+function findTime(line){
+
+  let m=
+    line.match(
+      /\b([01]?\d|2[0-3])\s*[:.]\s*([0-5]\d)\b/
+    );
+
+  if(m){
+
+    return makeTime(
+      +m[1],
+      +m[2],
+      'HIGH'
+    );
+
+  }
+
+  m=
+    line.match(
+      /\b([01]?\d|2[0-3])\s+([0-5]\d)\b/
+    );
+
+  if(m){
+
+    return makeTime(
+      +m[1],
+      +m[2],
+      'MEDIUM'
+    );
+
+  }
+
+  return {
+    value:'',
+    confidence:'LOW'
+  };
+
+}
+
+
+function makeTime(
+  hour,
+  minute,
+  confidence
+){
+
+  if(
+    hour>23 ||
+    minute>59
+  ){
+
+    return {
+      value:'',
+      confidence:'LOW'
+    };
+
+  }
+
+  return {
+    value:
+      String(hour).padStart(2,'0')+
+      ':'+
+      String(minute).padStart(2,'0'),
+    confidence
+  };
+
+}
+
+
+function parseCoordinates(s){
+
+  let x=s;
+
+  x=
+    x.replace(
+      /(\d{2,3})\s+(\d{5,6})(?=\s*°?\s*[EW]\b)/gi,
+      '$1.$2'
+    );
+
+  x=
+    x.replace(
+      /(\d{2,3})(\d{5,6})(?=\s*°?\s*[EW]\b)/gi,
+      '$1.$2'
+    );
+
+  x=
+    x.replace(
+      /(\d{2,3})[-](\d{5,6})(?=\s*°?\s*[EW]\b)/gi,
+      '$1.$2'
+    );
+
+  let m=
+    x.match(
+      /([+-]?\d{1,2}(?:\.\d+)?)\s*°?\s*([NS])\s*[,;)\]}]?\s*([+-]?\d{2,3}(?:\.\d+)?)\s*°?\s*([EW])/i
+    );
+
+  if(m){
+
+    return buildCoord(
+      +m[1],
+      m[2],
+      +m[3],
+      m[4],
+      'HIGH'
+    );
+
+  }
+
+  m=
+    x.match(
+      /([+-]?\d{1,2}(?:\.\d+)?)\s*°?\s*([NS])[\s\S]{0,45}?([+-]?\d{2,3}(?:\.\d+)?)\s*°?\s*([EW])/i
+    );
+
+  if(m){
+
+    return buildCoord(
+      +m[1],
+      m[2],
+      +m[3],
+      m[4],
+      'MEDIUM'
+    );
+
+  }
+
+  const latMatches=[
+    ...x.matchAll(
+      /([+-]?\d{1,2}(?:\.\d+)?)\s*°?\s*([NS])/ig
+    )
+  ];
+
+  for(const latMatch of latMatches){
+
+    const start=
+      latMatch.index+
+      latMatch[0].length;
+
+    const after=
+      x.slice(start,start+100);
+
+    const lonMatch=
+      after.match(
+        /([+-]?\d{2,3}(?:\.\d+)?)\s*°?\s*([EW])/i
+      );
+
+    if(lonMatch){
+
+      return buildCoord(
+        +latMatch[1],
+        latMatch[2],
+        +lonMatch[1],
+        lonMatch[2],
+        'HIGH'
+      );
+
+    }
+
+  }
+
+  m=
+    x.match(
+      /([+-]?\d{1,2}\.\d+)\s*°?\s*S[\s\S]{0,35}?([+-]?\d{2,3}\.\d+)(?!\d)/i
+    );
+
+  if(m){
+
+    return buildCoord(
+      +m[1],
+      'S',
+      +m[2],
+      '',
+      'MEDIUM'
+    );
+
+  }
+
+  return {
+    lat:'',
+    lon:'',
+    confidence:'LOW'
+  };
+
+}
+
+
+function buildCoord(
+  lat,
+  latDir,
+  lon,
+  lonDir,
+  confidence
+){
+
+  let latitude=Math.abs(lat);
+  let longitude=Math.abs(lon);
+
+  if(
+    String(latDir).toUpperCase()==='S'
+  ){
+    latitude=-latitude;
+  }
+
+  if(
+    String(lonDir).toUpperCase()==='W'
+  ){
+    longitude=-longitude;
+  }
+
+  if(
+    latitude<-90 ||
+    latitude>90 ||
+    longitude<-180 ||
+    longitude>180
+  ){
+
+    return {
+      lat:'',
+      lon:'',
+      confidence:'LOW'
+    };
+
+  }
+
+  return {
+    lat:latitude.toFixed(6),
+    lon:longitude.toFixed(6),
+    confidence
+  };
+
+}
+
+
+function overallConfidence(
+  date,
+  time,
+  coord
+){
+
+  if(
+    coord.confidence==='HIGH' &&
+    date.confidence==='HIGH' &&
+    time.confidence==='HIGH'
+  ){
+
+    return 'HIGH';
+
+  }
+
+  if(
+    coord.confidence==='HIGH' &&
+    (
+      date.confidence!=='LOW' ||
+      time.confidence!=='LOW'
+    )
+  ){
+
+    return 'HIGH';
+
+  }
+
+  if(
+    coord.confidence==='MEDIUM' ||
+    date.confidence==='MEDIUM' ||
+    time.confidence==='MEDIUM'
+  ){
+
+    return 'MEDIUM';
+
+  }
+
+  return 'LOW';
+
+}
+
+
+/* =========================================================
+   DISTANCE
+   Haversine — meter
+========================================================= */
+
+function distanceMeters(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+){
+
+  const R=6371000;
+
+  const p1=toRad(lat1);
+  const p2=toRad(lat2);
+
+  const dp=
+    toRad(lat2-lat1);
+
+  const dl=
+    toRad(lon2-lon1);
+
+  const a=
+    Math.sin(dp/2)**2+
+    Math.cos(p1)*
+    Math.cos(p2)*
+    Math.sin(dl/2)**2;
+
+  const c=
+    2*Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1-a)
+    );
+
+  return R*c;
+
+}
+
+
+function toRad(value){
+
+  return value*Math.PI/180;
+
+}
+
+
+/* =========================================================
+   MATCH DATABASE PLACE
+========================================================= */
+
+function matchPlace(parsed){
+
+  /*
+    Sesuai aturan:
+    koordinat hanya digunakan untuk pencocokan
+    jika confidence koordinat HIGH.
+  */
+  if(
+    !parsed ||
+    !parsed.coord ||
+    parsed.coord.confidence!=='HIGH' ||
+    !parsed.coord.lat ||
+    !parsed.coord.lon
+  ){
+
+    return {
+      found:false,
+      reason:'coordinate-not-high',
+      nearest:null,
+      candidates:[]
+    };
+
+  }
+
+  if(!places.length){
+
+    return {
+      found:false,
+      reason:'database-empty',
+      nearest:null,
+      candidates:[]
+    };
+
+  }
+
+  const lat=Number(parsed.coord.lat);
+  const lon=Number(parsed.coord.lon);
+
+  if(
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon)
+  ){
+
+    return {
+      found:false,
+      reason:'invalid-coordinate',
+      nearest:null,
+      candidates:[]
+    };
+
+  }
+
+  const all=places
+    .map((place,index)=>{
+
+      const distance=
+        distanceMeters(
+          lat,
+          lon,
+          place.lat,
+          place.lon
+        );
+
+      return {
+        ...place,
+        index,
+        distance
+      };
+
+    })
+    .sort(
+      (a,b)=>a.distance-b.distance
+    );
+
+  const inside=
+    all.filter(
+      x=>x.distance<=radius
+    );
+
+  if(!inside.length){
+
+    return {
+      found:false,
+      reason:'outside-radius',
+      nearest:all[0]||null,
+      candidates:[]
+    };
+
+  }
+
+  /*
+    Tempat terdekat menjadi hasil utama.
+  */
+  const nearestDistance=
+    inside[0].distance;
+
+  /*
+    Semua tempat dengan jarak yang sama secara praktis
+    dianggap satu titik lokasi jika selisih sangat kecil.
+    Ini menangani dua sekolah dengan koordinat identik.
+  */
+  const samePoint=
+    inside.filter(
+      x =>
+        Math.abs(
+          x.distance-nearestDistance
+        )<0.05
+    );
+
+  /*
+    Kandidat lain dalam radius, selain tempat utama.
+  */
+  const candidates=
+    inside.filter(
+      x=>!samePoint.includes(x)
+    );
+
+  return {
+    found:true,
+    reason:'matched',
+    nearest:inside[0],
+    samePoint,
+    candidates
+  };
+
+}
+
+
+/* =========================================================
+   RENDER RESULT CARDS
+========================================================= */
+
+function renderResults(){
+
+  if(!items.length){
+
+    $('results').innerHTML='';
+
+    $('summary').textContent=
+      'Belum ada hasil';
+
+    return;
+
+  }
+
+  $('results').innerHTML=
+    items.map(
+      (item,index)=>
+        createResultCard(item,index)
+    ).join('');
+
+  const high=
+    items.filter(
+      x =>
+        x.parsed &&
+        x.parsed.confidence==='HIGH'
+    ).length;
+
+  const medium=
+    items.filter(
+      x =>
+        x.parsed &&
+        x.parsed.confidence==='MEDIUM'
+    ).length;
+
+  const low=
+    items.length-high-medium;
+
+  const matched=
+    items.filter(
+      x =>
+        x.location &&
+        x.location.found
+    ).length;
+
+  $('summary').textContent=
+    `${items.length} foto • HIGH ${high} • MEDIUM ${medium} • LOW ${low} • Cocok ${matched}`;
+
+}
+
+
+function createResultCard(item,index){
+
+  const p=
+    item.parsed ||
+    emptyParsed();
+
+  const location=
+    item.location ||
+    null;
+
+  let placeName='Tempat tidak ditemukan';
+  let placeClass='no-place';
+  let candidatesHtml='';
+
+  if(location && location.found){
+
+    if(
+      location.samePoint &&
+      location.samePoint.length>1
+    ){
+
+      placeName=
+        location.samePoint
+          .map(x=>x.name)
+          .join(' / ');
+
+    }else{
+
+      placeName=
+        location.nearest
+          ? location.nearest.name
+          : 'Tempat tidak ditemukan';
+
+    }
+
+    placeClass='';
+
+    if(
+      location.candidates &&
+      location.candidates.length
+    ){
+
+      const names=
+        location.candidates
+          .map(x=>x.name)
+          .join(', ');
+
+      candidatesHtml=`
+        <div class="candidates">
+          Kandidat lain: ${esc(names)}
+        </div>
+      `;
+
+    }
+
+  }else if(
+    p.coord.confidence!=='HIGH'
+  ){
+
+    placeName='Tempat tidak ditemukan';
+
+  }
+
+  const mapDisabled=
+    !p.coord.lat ||
+    !p.coord.lon;
+
+  const mapsButton=
+    mapDisabled
+      ? ''
+      : `
+        <button
+          class="maps-btn"
+          onclick="openMaps(${index});event.stopPropagation()"
+        >🗺️ Maps</button>
+      `;
+
+  return `
+
+    <article class="result-card">
+
+      <img
+        class="result-photo"
+        src="${item.url}"
+        onclick="openPhoto(${index})"
+        alt=""
+      >
+
+      <div class="result-body">
+
+        <div class="place-name ${placeClass}">
+          ${esc(placeName)}
+        </div>
+
+        <div class="meta-row">
+          <span class="meta-label">Tanggal</span>
+          <span>${esc(p.date.value||'—')}</span>
+        </div>
+
+        <div class="meta-row">
+          <span class="meta-label">Waktu</span>
+          <span>${esc(p.time.value||'—')}</span>
+        </div>
+
+        <div class="coord-row">
+
+          <div class="coord-text">
+            📍 ${esc(
+              p.coord.lat && p.coord.lon
+                ? `${p.coord.lat}, ${p.coord.lon}`
+                : 'Koordinat tidak terbaca'
+            )}
+          </div>
+
+          ${mapsButton}
+
+        </div>
+
+        ${candidatesHtml}
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================================================
+   GOOGLE MAPS
+========================================================= */
+
+function openMaps(index){
+
+  const item=items[index];
+
+  if(
+    !item ||
+    !item.parsed ||
+    !item.parsed.coord ||
+    !item.parsed.coord.lat ||
+    !item.parsed.coord.lon
+  ){
+
+    return;
+
+  }
+
+  const lat=item.parsed.coord.lat;
+  const lon=item.parsed.coord.lon;
+
+  const url=
+    'https://www.google.com/maps/search/?api=1&query='+
+    encodeURIComponent(`${lat},${lon}`);
+
+  window.open(
+    url,
+    '_blank'
+  );
+
+}
+
+
+/* =========================================================
+   PHOTO FULLSCREEN
+========================================================= */
+
+function openPhoto(index){
+
+  const item=items[index];
+
+  if(!item) return;
+
+  $('photoTitle').textContent=
+    item.parsed &&
+    item.location &&
+    item.location.found
+      ? (
+          item.location.samePoint &&
+          item.location.samePoint.length>1
+            ? item.location.samePoint.map(x=>x.name).join(' / ')
+            : item.location.nearest
+              ? item.location.nearest.name
+              : ''
+        )
+      : '';
+
+  $('photoLarge').src=item.url;
+
+  $('photoModal').classList.add('show');
+
+}
+
+
+$('photoClose').onclick=()=>{
+  $('photoModal').classList.remove('show');
+};
+
+
+$('photoModal').onclick=e=>{
+
+  if(e.target===$('photoModal')){
+    $('photoModal').classList.remove('show');
+  }
+
+};
+
+
+/* =========================================================
+   DATABASE MODAL
+========================================================= */
+
+$('openDatabase').onclick=()=>{
+
+  renderDatabase();
+
+  $('dbModal').classList.add('show');
+
+};
+
+
+$('dbClose').onclick=()=>{
+  $('dbModal').classList.remove('show');
+};
+
+
+$('dbModal').onclick=e=>{
+
+  if(e.target===$('dbModal')){
+    $('dbModal').classList.remove('show');
+  }
+
+};
+
+
+/* =========================================================
+   DATABASE FORM
+========================================================= */
+
+$('dbSave').onclick=()=>{
+
+  const name=$('dbName').value.trim();
+  const lat=Number($('dbLat').value);
+  const lon=Number($('dbLon').value);
+
+  if(!name){
+
+    return alert(
+      'Nama tempat wajib diisi.'
+    );
+
+  }
+
+  if(
+    !Number.isFinite(lat) ||
+    lat<-90 ||
+    lat>90
+  ){
+
+    return alert(
+      'Latitude tidak valid.'
+    );
+
+  }
+
+  if(
+    !Number.isFinite(lon) ||
+    lon<-180 ||
+    lon>180
+  ){
+
+    return alert(
+      'Longitude tidak valid.'
+    );
+
+  }
+
+  const data={
+    name,
+    lat,
+    lon
+  };
+
+  if(editingIndex>=0){
+
+    places[editingIndex]=data;
+
+  }else{
+
+    places.push(data);
+
+  }
+
+  savePlaces();
+
+  clearDatabaseForm();
+
+  renderDatabase();
+
+  /*
+    Jika ada hasil OCR yang sudah ada,
+    hitung ulang pencocokan menggunakan database baru.
+  */
+  rematchAllItems();
+
+};
+
+
+$('dbCancelEdit').onclick=()=>{
+  clearDatabaseForm();
+};
+
+
+$('radius').onchange=()=>{
+
+  const value=Number($('radius').value);
+
+  if(
+    !Number.isFinite(value) ||
+    value<=0
+  ){
+
+    $('radius').value=radius;
+
+    return;
+
+  }
+
+  radius=value;
+
+  saveRadius();
+
+  updateRadiusUI();
+
+  rematchAllItems();
+
+};
+
+
+function clearDatabaseForm(){
+
+  editingIndex=-1;
+
+  $('dbName').value='';
+  $('dbLat').value='';
+  $('dbLon').value='';
+
+  $('dbSave').textContent='💾 SIMPAN';
+  $('dbCancelEdit').style.display='none';
+
+}
+
+
+function editPlace(index){
+
+  const place=places[index];
+
+  if(!place) return;
+
+  editingIndex=index;
+
+  $('dbName').value=place.name;
+  $('dbLat').value=place.lat;
+  $('dbLon').value=place.lon;
+
+  $('dbSave').textContent='💾 UPDATE';
+  $('dbCancelEdit').style.display='inline-block';
+
+  $('dbName').focus();
+
+}
+
+
+function deletePlace(index){
+
+  const place=places[index];
+
+  if(!place) return;
+
+  if(
+    !confirm(
+      `Hapus "${place.name}" dari database?`
+    )
+  ){
+    return;
+  }
+
+  places.splice(index,1);
+
+  savePlaces();
+
+  if(editingIndex===index){
+    clearDatabaseForm();
+  }
+
+  renderDatabase();
+
+  rematchAllItems();
+
+}
+
+
+/* =========================================================
+   DATABASE RENDER
+========================================================= */
+
+function renderDatabase(){
+
+  $('dbCount').textContent=
+    `${places.length} tempat dalam database`;
+
+  $('dbList').innerHTML=
+    places.length
+      ? places.map(
+          (place,index)=>`
+
+            <div class="db-item">
+
+              <div>
+
+                <div class="db-name">
+                  ${esc(place.name)}
+                </div>
+
+                <div class="db-coord">
+                  ${place.lat.toFixed(6)}, ${place.lon.toFixed(6)}
+                </div>
+
+              </div>
+
+              <div class="db-actions">
+
+                <button
+                  class="smallbtn"
+                  onclick="editPlace(${index})"
+                >Edit</button>
+
+                <button
+                  class="smallbtn"
+                  onclick="deletePlace(${index})"
+                >Hapus</button>
+
+              </div>
+
+            </div>
+
+          `
+        ).join('')
+      : `
+        <div class="db-empty">
+          Database masih kosong.
+        </div>
+      `;
+
+}
+
+
+/* =========================================================
+   REMATCH EXISTING OCR RESULTS
+========================================================= */
+
+function rematchAllItems(){
+
+  for(const item of items){
+
+    if(
+      item.parsed &&
+      item.parsed.coord
+    ){
+
+      item.location=
+        matchPlace(item.parsed);
+
+    }
+
+  }
+
+  renderResults();
+
+}
+
+
+/* =========================================================
+   EXPORT DATABASE JSON
+========================================================= */
+
+$('dbExport').onclick=()=>{
+
+  const data={
+    version:1,
+    radius,
+    places:places.map(
+      place=>({
+        name:place.name,
+        latitude:place.lat,
+        longitude:place.lon
+      })
+    )
+  };
+
+  const json=
+    JSON.stringify(
+      data,
+      null,
+      2
+    );
+
+  downloadBlob(
+    json,
+    'database_tempat_'+timestamp()+'.json',
+    'application/json'
+  );
+
+};
+
+
+/* =========================================================
+   IMPORT DATABASE JSON
+========================================================= */
+
+$('dbImportBtn').onclick=()=>{
+  $('dbImport').click();
+};
+
+
+$('dbImport').onchange=async e=>{
+
+  const file=e.target.files[0];
+
+  e.target.value='';
+
+  if(!file) return;
+
+  try{
+
+    const text=
+      await file.text();
+
+    const data=
+      JSON.parse(text);
+
+    /*
+      Mendukung format export baru:
+      {
+        version:1,
+        radius:50,
+        places:[...]
+      }
+
+      Juga mendukung array langsung:
+      [
+        {name,latitude,longitude}
+      ]
+
+      dan format:
+      {name,lat,lon}
+    */
+
+    let incoming=[];
+    let importedRadius=null;
+
+    if(Array.isArray(data)){
+
+      incoming=data;
+
+    }else if(
+      data &&
+      Array.isArray(data.places)
+    ){
+
+      incoming=data.places;
+
+      if(
+        Number.isFinite(Number(data.radius)) &&
+        Number(data.radius)>0
+      ){
+
+        importedRadius=
+          Number(data.radius);
+
+      }
+
+    }else{
+
+      throw new Error(
+        'Format JSON database tidak dikenali.'
+      );
+
+    }
+
+    const normalized=
+      incoming
+        .map(item=>{
+
+          const name=
+            String(
+              item.name ??
+              item.nama ??
+              ''
+            ).trim();
+
+          const lat=
+            Number(
+              item.latitude ??
+              item.lat
+            );
+
+          const lon=
+            Number(
+              item.longitude ??
+              item.lon
+            );
+
+          return {
+            name,
+            lat,
+            lon
+          };
+
+        })
+        .filter(item =>
+          item.name &&
+          Number.isFinite(item.lat) &&
+          item.lat>=-90 &&
+          item.lat<=90 &&
+          Number.isFinite(item.lon) &&
+          item.lon>=-180 &&
+          item.lon<=180
+        );
+
+    if(!normalized.length){
+
+      throw new Error(
+        'Tidak ada data tempat yang valid.'
+      );
+
+    }
+
+    if(
+      !confirm(
+        `Import ${normalized.length} tempat dan mengganti database saat ini?`
+      )
+    ){
+
+      return;
+
+    }
+
+    places=normalized;
+
+    savePlaces();
+
+    if(importedRadius){
+
+      radius=importedRadius;
+
+      saveRadius();
+
+      updateRadiusUI();
+
+    }
+
+    clearDatabaseForm();
+
+    renderDatabase();
+
+    rematchAllItems();
+
+    alert(
+      `Berhasil import ${places.length} tempat.`
+    );
+
+  }catch(err){
+
+    alert(
+      'Import gagal: '+err.message
+    );
+
+  }
+
+};
+
+
+/* =========================================================
+   DOWNLOAD BLOB
+========================================================= */
+
+function downloadBlob(
+  data,
+  name,
+  type
+){
+
+  const url=
+    URL.createObjectURL(
+      new Blob(
+        [data],
+        {type}
+      )
+    );
+
+  const a=
+    document.createElement('a');
+
+  a.href=url;
+  a.download=name;
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(
+    ()=>URL.revokeObjectURL(url),
+    1000
+  );
+
+}
+
+
+function timestamp(){
+
+  const d=new Date();
+
+  const p=
+    n=>String(n).padStart(2,'0');
+
+  return(
+    d.getFullYear()+
+    p(d.getMonth()+1)+
+    p(d.getDate())+
+    '_'+
+    p(d.getHours())+
+    p(d.getMinutes())+
+    p(d.getSeconds())
+  );
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function clone(value){
+
+  return JSON.parse(
+    JSON.stringify(value)
+  );
+
+}
+
+
+function stripAccent(s){
+
+  return s
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
+
+}
+
+
+function levenshtein(a,b){
+
+  const dp=
+    Array.from(
+      {
+        length:a.length+1
+      },
+      ()=>Array(
+        b.length+1
+      ).fill(0)
+    );
+
+  for(
+    let i=0;
+    i<=a.length;
+    i++
+  ){
+    dp[i][0]=i;
+  }
+
+  for(
+    let j=0;
+    j<=b.length;
+    j++
+  ){
+    dp[0][j]=j;
+  }
+
+  for(
+    let i=1;
+    i<=a.length;
+    i++
+  ){
+
+    for(
+      let j=1;
+      j<=b.length;
+      j++
+    ){
+
+      dp[i][j]=Math.min(
+        dp[i-1][j]+1,
+        dp[i][j-1]+1,
+        dp[i-1][j-1]+
+        (
+          a[i-1]===b[j-1]
+            ? 0
+            : 1
+        )
+      );
+
+    }
+
+  }
+
+  return dp[
+    a.length
+  ][
+    b.length
+  ];
+
+}
+
+
+function esc(s){
+
+  return String(s??'')
+    .replace(
+      /[&<>"']/g,
+      m=>({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+      }[m])
+    );
+
+}
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+updateRadiusUI();
+loadApiSettings();
+loadCrop();
+renderThumbs();
+renderResults();
+
+</script>
+
+</body>
+</html>
